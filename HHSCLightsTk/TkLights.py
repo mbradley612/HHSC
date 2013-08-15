@@ -13,9 +13,16 @@ ActivePython then type the following from the command prompt:
 
 pypm install pyserial
 
+'''
+import Tkinter as tk
+import tkFont
+import datetime
+import serial
+import time
+import logging
 
 
-
+'''
  Changes
 
 20130804 - MB - Added buttons to test lights on and lights off
@@ -28,15 +35,8 @@ from the Tk App to this object.
 (e.g. 3,2,1), this allows the race team to control the lights manually. 
 20130807 - MB - Changed configuration of minutes to race start to be zero minutes. This allows an immediate start of the light sequence,
 for example if the race team forget to start initiate the lights countdown before the start of the race.
-
+20130809 - MB Added a five minute "F flag" StartRaceStep. Changed label to "Minutes to F Flag". 
 '''
-import Tkinter as tk
-import tkFont
-import datetime
-import serial
-import time
-import logging
-
 comPort = 'COM3'
 logging.basicConfig(level=logging.INFO,
     format = "%(levelname)s:%(asctime)-15s %(message)s")
@@ -57,30 +57,6 @@ CONNECTED = 2
 
 
 class EasyDaqUSBRelay:
-    '''
-    EasyDaqUSBRelay encapsulates the interface to a an EasyDaq USB relay. This interface maps an array of integers to the
-    relays in the card. The EasyDaqRelay is hard coded to assume that you are using the first five relays for output - for
-    the card in use at HHSC, you can only use a relay for output. As soon as it makes a connection, the objects sends the
-    command sequence 'A' + chr(0) to the serial port to configure the first five relays to output.
-    
-    For more information on the protocol with the card, see: 
-    
-    http://www.easydaq.biz/Datasheets/Data%20Sheet%2034%20%20(Using%20Linux%20with%20EasyDAQ%20USB%20Products).pdf
-    
-    This object attempts to manage two characteristics of the card. Firstly, there must be a delay of at least 10 milliseconds
-    between commands send to the card. Any quicker, and the second command is lost. Secondly, the card can become disconnected
-    from the PC. This happened once, on the first day of Dinghy Week 1, 2013 although at the time of writing has not happened
-    again. This object therefore detects a loss of connection by every five seconds writing a read 'A' + chr(0) to the serial port
-    followed by a read. If the connection is lost, the object reconnects, configures the card as described above and then
-    resends the last command. So long as the light sequence has carried on running, the physical lights will show the correct
-    combination when the connection is re-established.
-    
-    This class uses a simple observer model to allow a GUI to monitor the current state of the connection and session.
-    
-    All asynchronous behaviour is managed through the Tk event queue. When queuing a command to the event queue using the
-    Tk after method, it is only possible to provide a function or method. This means that any parameters have to be stored
-    in instance variables, which makes it all a bit messy.  
-    '''
 
     def __init__(self, serialPortName,tkRoot):
         # capture the name of the serial port. On windows, this will be COM3, COM4 etc. The COM port is set
@@ -376,6 +352,17 @@ class StartRaceSequence(object):
         self.isRunning = False
         self.raceStartTime = None
         self.raceFinishCallback = None
+        self.observers = []
+        
+    def notifyObservers(self):
+        for anObserver in self.observers:
+            anObserver.startRaceSequenceChanged(self)
+    
+    def addObserver(self, anObserver):
+        '''
+        Add an observer to the relay. The callback the method relayStatusChanged
+        '''
+        self.observers.append(anObserver)
         
     def addStartStep(self, aStartStep):
         self.startRaceSteps.append(aStartStep)
@@ -390,6 +377,15 @@ class StartRaceSequence(object):
     
     def currentStep(self):
         return self.startRaceSteps[self.currentStepNumber]
+        
+    def hasNextStep(self):
+        return not self.nextStep() == None
+        
+    def nextStep(self):
+        if self.currentStepNumber < (len(self.startRaceSteps)-1):
+            return self.startRaceSteps[self.currentStepNumber+1]
+        else:
+            return None
     
     def startCurrentStep(self):
         self.currentStep().run(self.easyDaqRelay,self.tkRoot)
@@ -401,10 +397,11 @@ class StartRaceSequence(object):
         # so now we know the duration of the step
         stepDuration = stepFinishTime - datetime.datetime.now()
         
-        logging.info( "Step %i duration will be %f" % (self.currentStepNumber, stepDuration.total_seconds()))
+        logging.info( "Step %i %s duration will be %f" % (self.currentStepNumber, self.currentStep(), stepDuration.total_seconds()))
         
         # and we move onto the next step after the duration of the step
         self.tkRoot.after(int(round(stepDuration.total_seconds()) * 1000), self.moveToNextStep)
+        self.notifyObservers()
         
             
     def moveToNextStep(self):
@@ -423,16 +420,21 @@ class StartRaceSequence(object):
         
             self.easyDaqRelay.sendRelayCommand(
             [LIGHT_OFF, LIGHT_OFF, LIGHT_OFF, LIGHT_OFF, LIGHT_OFF])
-        
+        self.notifyObservers()
             
          
         
 class StartRaceStep(object):
-    def __init__(self, fromSecondsBefore, toSecondsBefore, lightState):
+    def __init__(self, fromSecondsBefore, toSecondsBefore, lightState, description):
         self.fromSecondsBefore = fromSecondsBefore
         self.toSecondsBefore = toSecondsBefore
         self.lightState = lightState
         self.flashingState = 0
+        self.description = description
+        
+        
+    def __str__(self):
+        return "%s for %d seconds" % (self.description, (self.fromSecondsBefore - self.toSecondsBefore))
         
     def run(self,easyDaqRelay,tkRoot):
         '''
@@ -475,8 +477,15 @@ class StartRaceStep(object):
             self.easyDaqRelay.sendRelayCommand(lightStateIteration)
             self.tkRoot.after(500,self.runWithFlashingLights)
             
-        
+
+def addFFlagStep(sequence,numberStarts):
+
+    # 
+    # We calculate the end time for the F Flag step as five minutes per numberStarts . The start time is five minutes earlier.
+    sequence.addStartStep(StartRaceStep(300 + numberStarts*300, 0 + numberStarts*300,[LIGHT_OFF,LIGHT_OFF, LIGHT_OFF, LIGHT_OFF, LIGHT_OFF], "F Flag, 10 minute warning"))
+            
 def addFiveMinuteStarts(sequence, numberStarts):
+
 
     for i in range(numberStarts):
     
@@ -486,16 +495,18 @@ def addFiveMinuteStarts(sequence, numberStarts):
         
         raceDelay = racesAfter * 300
         
-
-        sequence.addStartStep(StartRaceStep(300 + raceDelay,240+ raceDelay,[LIGHT_ON, LIGHT_ON, LIGHT_ON, LIGHT_ON, LIGHT_ON]))
-        sequence.addStartStep(StartRaceStep(240+ raceDelay,180+ raceDelay,[ LIGHT_ON, LIGHT_ON, LIGHT_ON, LIGHT_ON,LIGHT_OFF]))
-        sequence.addStartStep(StartRaceStep(180+ raceDelay,120+ raceDelay,[LIGHT_ON, LIGHT_ON, LIGHT_ON,LIGHT_OFF, LIGHT_OFF ]))
-        sequence.addStartStep(StartRaceStep(120+ raceDelay,60+ raceDelay,[LIGHT_ON, LIGHT_ON, LIGHT_OFF, LIGHT_OFF, LIGHT_OFF ]))
-        sequence.addStartStep(StartRaceStep(60+ raceDelay,30+ raceDelay,[LIGHT_ON,LIGHT_OFF, LIGHT_OFF, LIGHT_OFF, LIGHT_OFF]))
-        sequence.addStartStep(StartRaceStep(30+ raceDelay,0+ raceDelay,[LIGHT_FLASHING,LIGHT_OFF, LIGHT_OFF, LIGHT_OFF, LIGHT_OFF ]))
+        descriptionRaceNumber = i + 1
         
-    return sequence
+        print sequence
+        
 
+        sequence.addStartStep(StartRaceStep(300 + raceDelay,240+ raceDelay,[LIGHT_ON, LIGHT_ON, LIGHT_ON, LIGHT_ON, LIGHT_ON],"Race %d, 5 minute lights" % descriptionRaceNumber))
+        sequence.addStartStep(StartRaceStep(240+ raceDelay,180+ raceDelay,[ LIGHT_ON, LIGHT_ON, LIGHT_ON, LIGHT_ON,LIGHT_OFF],"Race %d, 4 minute lights" % descriptionRaceNumber))
+        sequence.addStartStep(StartRaceStep(180+ raceDelay,120+ raceDelay,[LIGHT_ON, LIGHT_ON, LIGHT_ON,LIGHT_OFF, LIGHT_OFF ],"Race %d, 3 minute lights" % descriptionRaceNumber))
+        sequence.addStartStep(StartRaceStep(120+ raceDelay,60+ raceDelay,[LIGHT_ON, LIGHT_ON, LIGHT_OFF, LIGHT_OFF, LIGHT_OFF ],"Race %d, 2 minute lights" % descriptionRaceNumber))
+        sequence.addStartStep(StartRaceStep(60+ raceDelay,30+ raceDelay,[LIGHT_ON,LIGHT_OFF, LIGHT_OFF, LIGHT_OFF, LIGHT_OFF],"Race %d, 1 minute lights" % descriptionRaceNumber))
+        sequence.addStartStep(StartRaceStep(30+ raceDelay,0+ raceDelay,[LIGHT_FLASHING,LIGHT_OFF, LIGHT_OFF, LIGHT_OFF, LIGHT_OFF ],"Race %d, 30 seconds lights" % descriptionRaceNumber))
+        
 class Application(tk.Frame):              
     def __init__(self, master=None):
         tk.Frame.__init__(self, master)
@@ -503,22 +514,38 @@ class Application(tk.Frame):
         self.grid()                       
         self.createWidgets()
         self.connectToRelay()
-        
+        self.isFFlagStart = True
         
     
     def startCountdown(self):
         self.isFlashing = False
+        
+        if self.startType.get() == "Flag":
+            self.isFFlagStart = True
+        else:
+            self.isFFlagStart = False
         logging.info("Starting race sequence with %d starts " % self.numberStarts.get())
         self.startRaceSequence = StartRaceSequence()
-        
-        self.startRaceSequence = addFiveMinuteStarts(self.startRaceSequence,self.numberStarts.get())
+        self.startRaceSequence.addObserver(self)
+   
+        # if this is an F Flag Start
+        if self.isFFlagStart:
+            addFFlagStep(self.startRaceSequence,self.numberStarts.get())
+            
+        # we always add our five minute starts
+        addFiveMinuteStarts(self.startRaceSequence,self.numberStarts.get())
         
         # and schedule the start of the race sequence)
-        startDelay = int(round(self.timeToFirstLight.get() * 60 / testSpeedRatio))
+        startDelay = int(round(self.timeToSequenceStart.get() * 60 / testSpeedRatio))
         
-        self.firstLightTime = datetime.datetime.now() + datetime.timedelta(seconds=startDelay)
+        self.startSequenceTime = datetime.datetime.now() + datetime.timedelta(seconds=startDelay)
         
-        self.startRaceSequence.raceStartTime = datetime.datetime.now() + (datetime.timedelta(minutes=5*self.numberStarts.get())/ testSpeedRatio) +datetime.timedelta(seconds=startDelay)
+        if self.isFFlagStart:
+            startSequenceMinutesDuration = (5*self.numberStarts.get()) + 5
+        else:
+            startSequenceMinutesDuration = (5*self.numberStarts.get())
+        
+        self.startRaceSequence.raceStartTime = datetime.datetime.now() + (datetime.timedelta(minutes=startSequenceMinutesDuration)/ testSpeedRatio)+datetime.timedelta(seconds=startDelay)
         
 
         logging.info("Starting light sequence in %d seconds" % startDelay)
@@ -533,7 +560,7 @@ class Application(tk.Frame):
         
     def updateCountdown(self):
         if self.countdownRunning:
-            countdownTimeRemaining = self.firstLightTime - datetime.datetime.now()
+            countdownTimeRemaining = self.startSequenceTime - datetime.datetime.now()
             self.countdownToFirstLight.set(str(countdownTimeRemaining))
             
             self.after(250,self.updateCountdown)
@@ -645,8 +672,28 @@ class Application(tk.Frame):
         helv18 = tkFont.Font(family="Helvetica",size=18,weight="bold")
         helv12 = tkFont.Font(family="Helvetica",size=12)
     
-        self.label1 = tk.Label(self, text='Number of starts',font=helv18)
-        self.label1.grid(row=0,column=0,sticky=tk.E,pady=2)
+        self.startType = tk.StringVar()
+        self.startType.set("Flag")
+        
+        self.fFlagRadioButton = tk.Radiobutton(self, 
+            text='F flag sequence',
+            font=helv18,
+            variable = self.startType,
+            value = "Flag" )
+        self.fFlagRadioButton.grid(row=0,column=0,sticky=tk.W,pady=2)
+        
+        
+        self.classFlagRadioButton = tk.Radiobutton(self, 
+            text='Class flag sequence',
+            font=helv18,
+            variable = self.startType,
+            value = "Class" )
+        self.classFlagRadioButton.grid(row=1,column=0,sticky=tk.W,pady=2)
+        
+    
+        self.label1 = tk.Label(self, text='Number of starts:',font=helv18)
+        self.label1.grid(row=0,column=2,sticky=tk.E,pady=2)
+            
         
         self.numberStarts = tk.IntVar()
         self.numberStartsSpinbox = tk.Spinbox(self,
@@ -655,32 +702,32 @@ class Application(tk.Frame):
             to=9,
             width=3)
         
-        self.numberStartsSpinbox.grid(row=0,column=1,sticky=tk.W)
-        
-        self.label2 = tk.Label(self, 
-            text='Minutes to first light',font=helv18)
-        self.label2.grid(row=1,column=0,sticky=tk.E,pady=2)
+        self.numberStartsSpinbox.grid(row=0,column=3,sticky=tk.W)
         
         
-        self.timeToFirstLight = tk.IntVar()
-        self.timeToFirstLightSpinbox = tk.Spinbox(self,
-            textvariable=self.timeToFirstLight,
-            from_=0,
+        self.label3 = tk.Label(self, 
+            text='Minutes to sequence start:',font=helv18)
+        self.label3.grid(row=1,column=2,sticky=tk.E,pady=2)
+        
+        self.timeToSequenceStart = tk.IntVar()
+        self.timeToSequenceStartSpinbox = tk.Spinbox(self,
+            textvariable=self.timeToSequenceStart,
+            from_=1,
             to=5,
             width=3)
         
-        self.timeToFirstLightSpinbox.grid(row=1,column=1,sticky=tk.W)
+        self.timeToSequenceStartSpinbox.grid(row=1,column=3,sticky=tk.W)
         
-        self.label3 = tk.Label(self,
-        text="Countdown to light sequence",
+        self.label4 = tk.Label(self,
+        text="Countdown to start sequence",
         font=helv18)
-        self.label3.grid(row=4,column=0,sticky=tk.E,pady=10)
+        self.label4.grid(row=4,column=0,columnspan=2,sticky=tk.E,pady=10)
         
         self.countdownToFirstLight = tk.StringVar()
         self.countdownToFirstLight.set("..:..")
         self.countdownToFirstLightLabel = tk.Label(self,
             textvariable=self.countdownToFirstLight,anchor=tk.W,font=helv18)
-        self.countdownToFirstLightLabel.grid(row=4,column=1)
+        self.countdownToFirstLightLabel.grid(row=4,column=2)
 
         self.relayStatus = tk.StringVar()
         self.relayStatus.set("Establishing session to lights")
@@ -688,7 +735,7 @@ class Application(tk.Frame):
             textvariable=self.relayStatus,
             anchor=tk.W,
             font=helv12)
-        self.relayStatusLabel.grid(row=6,columnspan=2)
+        self.relayStatusLabel.grid(row=6,column=0)
 
 
 
@@ -702,7 +749,7 @@ class Application(tk.Frame):
         self.oneLightButton = tk.Button(self,text='1',
             state=tk.DISABLED,
             command=self.oneLight)
-        self.oneLightButton.grid(row=0,column=3)
+        self.oneLightButton.grid(row=0,column=4)
         
         
         self.flashingOneLightButton = tk.Button(self,text='1 flashing',
@@ -714,22 +761,22 @@ class Application(tk.Frame):
         self.twoLightsButton = tk.Button(self,text='2',
             state=tk.DISABLED,
             command=self.twoLights)
-        self.twoLightsButton.grid(row=1,column=3)
+        self.twoLightsButton.grid(row=1,column=4)
         
         self.threeLightsButton = tk.Button(self,text='3',
             state=tk.DISABLED,
             command=self.threeLights)
-        self.threeLightsButton.grid(row=2,column=3)
+        self.threeLightsButton.grid(row=2,column=4)
         
         self.fourLightsButton = tk.Button(self,text='4',
             state=tk.DISABLED,
             command=self.fourLights)
-        self.fourLightsButton.grid(row=3,column=3)
+        self.fourLightsButton.grid(row=3,column=4)
         
         self.fiveLightsButton = tk.Button(self,text='5',
             state=tk.DISABLED,
             command=self.fiveLights)
-        self.fiveLightsButton.grid(row=4,column=3)
+        self.fiveLightsButton.grid(row=4,column=4)
         
         
         # the start button is disabled on startup to give the
@@ -738,14 +785,41 @@ class Application(tk.Frame):
         self.startButton = tk.Button(self, text='Start countdown',
             state=tk.DISABLED,
             command=self.startCountdown)
-        self.startButton.grid(row=7,column=1,ipadx=5,ipady=6,padx=2)
+        self.startButton.grid(row=2,column=0,ipadx=5,ipady=6,padx=2)
         
         
         self.quitButton = tk.Button(self, text='Quit',
             command=self.quitApp)            
         self.quitButton.grid(row=7,column=3,ipadx=5,ipady=6,padx=2)      
-
         
+        self.label5 = tk.Label(self, text='Current step')
+        self.label5.grid(row=7, column = 0)
+        
+        
+        self.currentStepDescription = tk.StringVar()
+        self.currentStepDescription.set("None")
+        self.currentStepDescriptionLabel = tk.Label(self,
+            textvariable = self.currentStepDescription)
+        self.currentStepDescriptionLabel.grid(row=7, column =1, columnspan=2)
+        
+        
+        self.label6 = tk.Label(self, text='Next step')
+        self.label6.grid(row=8, column = 0)
+        
+        self.nextStepDescription = tk.StringVar()
+        self.nextStepDescription.set("None")
+        self.nextStepDescriptionLabel = tk.Label(self,
+            textvariable = self.nextStepDescription)
+        self.nextStepDescriptionLabel.grid(row=8, column =1, columnspan=2)
+        
+
+    def startRaceSequenceChanged(self, startRaceSequence):
+        
+        self.currentStepDescription.set(str(startRaceSequence.currentStep()))
+        if startRaceSequence.hasNextStep():
+            self.nextStepDescription.set(str(startRaceSequence.nextStep()))
+        else:
+            self.nextStepDescription.set("None")
         
 app = Application()                       
 app.master.title('HHSC Race Lights')    
