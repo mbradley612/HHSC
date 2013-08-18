@@ -844,6 +844,7 @@ class Application(tk.Frame):
             self.updateCurrentStepTimeRemaining()
         else:
             self.currentStepDescription.set(str("None"))
+            self.startButton["state"] = tk.NORMAL
             
         if startRaceSequence.isRunning and startRaceSequence.hasNextStep():
             self.nextStepDescription.set(str(startRaceSequence.nextStep()))
