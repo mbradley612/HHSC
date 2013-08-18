@@ -35,7 +35,8 @@ from the Tk App to this object.
 (e.g. 3,2,1), this allows the race team to control the lights manually. 
 20130807 - MB - Changed configuration of minutes to race start to be zero minutes. This allows an immediate start of the light sequence,
 for example if the race team forget to start initiate the lights countdown before the start of the race.
-20130809 - MB Added a five minute "F flag" StartRaceStep. Changed label to "Minutes to F Flag". 
+20130809 - MB Added a five minute "F flag" StartRaceStep. Changed label to "Minutes to F Flag".
+20130818 - MB Added "current step" and "next step" labels with countdown on current step 
 '''
 comPort = 'COM3'
 logging.basicConfig(level=logging.INFO,
@@ -43,7 +44,7 @@ logging.basicConfig(level=logging.INFO,
 
 
 # how much faster we want the steps to go for testing
-testSpeedRatio = 1
+testSpeedRatio = 10
 
 # constants for lights state
 LIGHT_OFF = 0
@@ -392,17 +393,22 @@ class StartRaceSequence(object):
                     
         # calculate when the step should _finish_. This is the steps
         # toSecondsBefore subtracted from the race start time
-        stepFinishTime = self.raceStartTime - datetime.timedelta(seconds=(self.currentStep().toSecondsBefore/ testSpeedRatio))
+        self.currentStepFinishTime = self.raceStartTime - datetime.timedelta(seconds=(self.currentStep().toSecondsBefore/ testSpeedRatio))
         
         # so now we know the duration of the step
-        stepDuration = stepFinishTime - datetime.datetime.now()
+        stepDuration = self.currentStepFinishTime - datetime.datetime.now()
         
         logging.info( "Step %i %s duration will be %f" % (self.currentStepNumber, self.currentStep(), stepDuration.total_seconds()))
         
         # and we move onto the next step after the duration of the step
         self.tkRoot.after(int(round(stepDuration.total_seconds()) * 1000), self.moveToNextStep)
         self.notifyObservers()
+
+
+    def currentStepSecondsRemaining(self):
+        timeRemaining =  self.currentStepFinishTime - datetime.datetime.now()
         
+        return timeRemaining.seconds
             
     def moveToNextStep(self):
         # stop the current step
@@ -420,7 +426,8 @@ class StartRaceSequence(object):
         
             self.easyDaqRelay.sendRelayCommand(
             [LIGHT_OFF, LIGHT_OFF, LIGHT_OFF, LIGHT_OFF, LIGHT_OFF])
-        self.notifyObservers()
+            self.isRunning = False
+            self.notifyObservers()
             
          
         
@@ -561,7 +568,9 @@ class Application(tk.Frame):
     def updateCountdown(self):
         if self.countdownRunning:
             countdownTimeRemaining = self.startSequenceTime - datetime.datetime.now()
-            self.countdownToFirstLight.set(str(countdownTimeRemaining))
+            minutes, seconds = divmod(countdownTimeRemaining.seconds, 60)
+            
+            self.countdownToFirstLight.set("%02d:%02d" % (minutes,seconds))
             
             self.after(250,self.updateCountdown)
     
@@ -677,7 +686,7 @@ class Application(tk.Frame):
         
         self.fFlagRadioButton = tk.Radiobutton(self, 
             text='F flag sequence',
-            font=helv18,
+            #font=helv18,
             variable = self.startType,
             value = "Flag" )
         self.fFlagRadioButton.grid(row=0,column=0,sticky=tk.W,pady=2)
@@ -685,13 +694,13 @@ class Application(tk.Frame):
         
         self.classFlagRadioButton = tk.Radiobutton(self, 
             text='Class flag sequence',
-            font=helv18,
+            #font=helv18,
             variable = self.startType,
             value = "Class" )
         self.classFlagRadioButton.grid(row=1,column=0,sticky=tk.W,pady=2)
         
     
-        self.label1 = tk.Label(self, text='Number of starts:',font=helv18)
+        self.label1 = tk.Label(self, text='Number of starts:')
         self.label1.grid(row=0,column=2,sticky=tk.E,pady=2)
             
         
@@ -706,7 +715,7 @@ class Application(tk.Frame):
         
         
         self.label3 = tk.Label(self, 
-            text='Minutes to sequence start:',font=helv18)
+            text='Minutes to sequence start:')
         self.label3.grid(row=1,column=2,sticky=tk.E,pady=2)
         
         self.timeToSequenceStart = tk.IntVar()
@@ -719,22 +728,20 @@ class Application(tk.Frame):
         self.timeToSequenceStartSpinbox.grid(row=1,column=3,sticky=tk.W)
         
         self.label4 = tk.Label(self,
-        text="Countdown to start sequence",
-        font=helv18)
+        text="Countdown to start sequence")
         self.label4.grid(row=4,column=0,columnspan=2,sticky=tk.E,pady=10)
         
         self.countdownToFirstLight = tk.StringVar()
         self.countdownToFirstLight.set("..:..")
         self.countdownToFirstLightLabel = tk.Label(self,
-            textvariable=self.countdownToFirstLight,anchor=tk.W,font=helv18)
+            textvariable=self.countdownToFirstLight,anchor=tk.W)
         self.countdownToFirstLightLabel.grid(row=4,column=2)
 
         self.relayStatus = tk.StringVar()
         self.relayStatus.set("Establishing session to lights")
         self.relayStatusLabel = tk.Label(self, 
             textvariable=self.relayStatus,
-            anchor=tk.W,
-            font=helv12)
+            anchor=tk.W)
         self.relayStatusLabel.grid(row=6,column=0)
 
 
@@ -790,7 +797,7 @@ class Application(tk.Frame):
         
         self.quitButton = tk.Button(self, text='Quit',
             command=self.quitApp)            
-        self.quitButton.grid(row=7,column=3,ipadx=5,ipady=6,padx=2)      
+        self.quitButton.grid(row=7,column=5,ipadx=5,ipady=6,padx=2)      
         
         self.label5 = tk.Label(self, text='Current step')
         self.label5.grid(row=7, column = 0)
@@ -803,6 +810,13 @@ class Application(tk.Frame):
         self.currentStepDescriptionLabel.grid(row=7, column =1, columnspan=2)
         
         
+        self.currentStepTimeRemaining = tk.StringVar()
+        self.currentStepTimeRemaining.set("Not started")
+        self.currentStepTimeRemainingLabel = tk.Label(self,
+            textvariable = self.currentStepTimeRemaining)
+        self.currentStepTimeRemainingLabel.grid(row=7, column =3, columnspan=1)
+        
+        
         self.label6 = tk.Label(self, text='Next step')
         self.label6.grid(row=8, column = 0)
         
@@ -812,14 +826,31 @@ class Application(tk.Frame):
             textvariable = self.nextStepDescription)
         self.nextStepDescriptionLabel.grid(row=8, column =1, columnspan=2)
         
+        
+    def updateCurrentStepTimeRemaining(self):
+        if self.startRaceSequence.isRunning:
+            
+            
+            minutes, seconds = divmod(self.startRaceSequence.currentStepSecondsRemaining(), 60)
+            
+            self.currentStepTimeRemaining.set("%02d:%02d" % (minutes,seconds))
+            self.after(500,self.updateCurrentStepTimeRemaining)
 
     def startRaceSequenceChanged(self, startRaceSequence):
         
-        self.currentStepDescription.set(str(startRaceSequence.currentStep()))
-        if startRaceSequence.hasNextStep():
+        if startRaceSequence.isRunning:
+            
+            self.currentStepDescription.set(str(startRaceSequence.currentStep()))
+            self.updateCurrentStepTimeRemaining()
+        else:
+            self.currentStepDescription.set(str("None"))
+            
+        if startRaceSequence.isRunning and startRaceSequence.hasNextStep():
             self.nextStepDescription.set(str(startRaceSequence.nextStep()))
         else:
             self.nextStepDescription.set("None")
+            
+        
         
 app = Application()                       
 app.master.title('HHSC Race Lights')    
