@@ -44,7 +44,7 @@ logging.basicConfig(level=logging.INFO,
 
 
 # how much faster we want the steps to go for testing
-testSpeedRatio = 10
+testSpeedRatio = 1
 
 # constants for lights state
 LIGHT_OFF = 0
@@ -375,6 +375,12 @@ class StartRaceSequence(object):
         self.currentStepNumber = 0
         self.startCurrentStep()
         
+    def reset(self):
+        self.currentStep().stop()
+        self.isRunning = False
+        self.startRaceSteps = []
+        self.notifyObservers()
+        
     
     def currentStep(self):
         return self.startRaceSteps[self.currentStepNumber]
@@ -522,6 +528,8 @@ class Application(tk.Frame):
         self.createWidgets()
         self.connectToRelay()
         self.isFFlagStart = True
+        self.startRaceSequence = StartRaceSequence()
+        self.startRaceSequence.addObserver(self)
         
     
     def startCountdown(self):
@@ -532,8 +540,7 @@ class Application(tk.Frame):
         else:
             self.isFFlagStart = False
         logging.info("Starting race sequence with %d starts " % self.numberStarts.get())
-        self.startRaceSequence = StartRaceSequence()
-        self.startRaceSequence.addObserver(self)
+        
    
         # if this is an F Flag Start
         if self.isFFlagStart:
@@ -556,14 +563,16 @@ class Application(tk.Frame):
         
 
         logging.info("Starting light sequence in %d seconds" % startDelay)
-        self.after(startDelay*1000,self.runRaceSequence)
+        self.runRaceSequenceTimer = self.after(startDelay*1000,self.runRaceSequence)
         
         # start the countdown
         self.countdownRunning = True
         self.updateCountdown()
         
-        # and disable the start button#
+        # disable the start button#
         self.startButton['state'] = tk.DISABLED
+        # enable the reset button
+        self.resetSequenceButton['state'] = tk.NORMAL
         
     def updateCountdown(self):
         if self.countdownRunning:
@@ -674,7 +683,23 @@ class Application(tk.Frame):
         
         self.easyDaqRelay.sendRelayCommand([LIGHT_ON,LIGHT_ON,LIGHT_ON,
             LIGHT_ON,LIGHT_ON])
-    
+        
+    def resetSequence(self):
+        # if we're counting down to the sequence start, cancel the timer
+        if self.countdownRunning:
+            self.countdownRunning = False
+            self.after_cancel(self.runRaceSequenceTimer)
+            
+            
+            
+        if self.startRaceSequence.isRunning:
+            self.startRaceSequence.reset()
+            self.currentStepTimeRemaining.set("Not started")
+        
+        # either way, set the label back to ..:..
+        self.startButton['state'] = tk.NORMAL
+        self.resetSequenceButton['state'] = tk.DISABLED
+        self.countdownToFirstLight.set("..:..")
     
     def createWidgets(self):
     
@@ -789,10 +814,15 @@ class Application(tk.Frame):
         # the start button is disabled on startup to give the
         # serial port connection time to establish. We enable
         # after 1 second.
-        self.startButton = tk.Button(self, text='Start countdown',
+        self.startButton = tk.Button(self, text='Start sequence',
             state=tk.DISABLED,
             command=self.startCountdown)
         self.startButton.grid(row=2,column=0,ipadx=5,ipady=6,padx=2)
+        
+        self.resetSequenceButton = tk.Button(self, text='Reset sequence',
+            state=tk.DISABLED,
+            command=self.resetSequence)
+        self.resetSequenceButton.grid(row=3,column=0,ipadx=5,ipady=6,padx=2)
         
         
         self.quitButton = tk.Button(self, text='Quit',
@@ -845,6 +875,7 @@ class Application(tk.Frame):
         else:
             self.currentStepDescription.set(str("None"))
             self.startButton["state"] = tk.NORMAL
+            self.resetSequenceButton['state'] = tk.DISABLED
             
         if startRaceSequence.isRunning and startRaceSequence.hasNextStep():
             self.nextStepDescription.set(str(startRaceSequence.nextStep()))
