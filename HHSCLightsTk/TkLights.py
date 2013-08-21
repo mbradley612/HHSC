@@ -3,6 +3,8 @@ Created on 4 Aug 2013
 
 @author: Matthew Bradley
 
+Usage: 
+-p [serial port to connect to] -t [default 1, set to more than 1 to run faster]
 
 This is a quick and dirty implementation of an application to allow the race team at HillHead to control the race start lights. It is written
 in Python using the pyserial module to talk to the EasyDaq USB relay over a serial port, and the Tk widget toolkit to provide the user interface.
@@ -22,6 +24,8 @@ import datetime
 import serial
 import time
 import logging
+import sys
+import getopt
 
 
 '''
@@ -42,8 +46,11 @@ for example if the race team forget to start initiate the lights countdown befor
 20130821 - MB Restyled layout  
 '''
 
-# this would be much better as a parameter to the script
-comPort = 'COM3'
+testSpeedRatio = 1
+comPort = None
+
+
+
 logging.basicConfig(level=logging.INFO,
     format = "%(levelname)s:%(asctime)-15s %(message)s")
 
@@ -535,10 +542,16 @@ class Application(tk.Frame):
         self.isFFlagStart = True
         self.startRaceSequence = StartRaceSequence()
         self.startRaceSequence.addObserver(self)
-        
+        self.checkComPortSet()
     
     
     
+    def checkComPortSet(self):
+        # check that we have a COM port. This should be passed on the command line
+        if not comPort:
+            tkMB.showerror("No serial port defined", "You must pass the serial port as a parameter to the application, e.g. -p COM3")
+            
+             
     def startCountdownOnConfirm(self):
         
         if self.startType.get() == "Flag":
@@ -786,7 +799,7 @@ class Application(tk.Frame):
         self.relayStatusLabel = ttk.Label(self, 
             textvariable=self.relayStatus,
             anchor=tk.W)
-        self.relayStatusLabel.grid(row=10,column=0,sticky=tk.W)
+        self.relayStatusLabel.grid(row=10,column=0,sticky=tk.W,columnspan=4)
 
 
         self.manualLightsFrame = ttk.LabelFrame(self,text="Manual control")
@@ -920,7 +933,20 @@ class Application(tk.Frame):
         else:
             self.nextStepDescription.set("None")
             
-        
+
+# read the command line arguments
+
+logging.debug(sys.argv)
+myopts, args = getopt.getopt(sys.argv[1:],"p:t:",["port=","testSpeedRatio="])        
+
+for o, a in myopts:
+    logging.debug("Option %s value %s" % (o,a))
+    if o in ('-p','--port'):
+        comPort=a
+    elif o in ('-t','--testSpeedRatio'):
+        testSpeedRatio=int(a)
+    else:
+        print("Usage: %s -p [serial port to connect to] -t [default 1, set to more than 1 to run faster]" % sys.argv[0])
         
 app = Application()                       
 app.master.title('HHSC Race Lights')    
