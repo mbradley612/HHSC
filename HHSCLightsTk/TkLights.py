@@ -15,6 +15,8 @@ pypm install pyserial
 
 '''
 import Tkinter as tk
+import tkMessageBox as tkMB
+import ttk as ttk
 import tkFont
 import datetime
 import serial
@@ -38,6 +40,8 @@ for example if the race team forget to start initiate the lights countdown befor
 20130809 - MB Added a five minute "F flag" StartRaceStep. Changed label to "Minutes to F Flag".
 20130818 - MB Added "current step" and "next step" labels with countdown on current step 
 '''
+
+# this would be much better as a parameter to the script
 comPort = 'COM3'
 logging.basicConfig(level=logging.INFO,
     format = "%(levelname)s:%(asctime)-15s %(message)s")
@@ -532,13 +536,26 @@ class Application(tk.Frame):
         self.startRaceSequence.addObserver(self)
         
     
-    def startCountdown(self):
-        self.isFlashing = False
+    
+    
+    def startCountdownOnConfirm(self):
         
         if self.startType.get() == "Flag":
             self.isFFlagStart = True
         else:
             self.isFFlagStart = False
+        # build message
+        if self.isFFlagStart:
+            message = "F flag sequence with %d starts starting in %d minutes" % (self.numberStarts.get(), self.timeToSequenceStart.get())
+        else:
+            message = "C flag sequence with %d starts starting in %d minutes" % (self.numberStarts.get(), self.timeToSequenceStart.get())
+            
+        if tkMB.askokcancel("Start Sequence",message ):
+            self.startCountdown()
+            
+    def startCountdown(self):
+        self.isFlashing = False
+        
         logging.info("Starting race sequence with %d starts " % self.numberStarts.get())
         
    
@@ -611,7 +628,7 @@ class Application(tk.Frame):
         if self.easyDaqRelay.isConnected():
             self.easyDaqRelay.sendRelayCommand([LIGHT_OFF,LIGHT_OFF,LIGHT_OFF,LIGHT_OFF,LIGHT_OFF])
             self.after(1000,self.easyDaqRelay.disconnect)
-        # now ask Tk to quit
+        # now ask ttk to quit
         self.after(2000,self.quit)
         
     def relayStateChanged(self,easyDaqRelay):
@@ -709,7 +726,7 @@ class Application(tk.Frame):
         self.startType = tk.StringVar()
         self.startType.set("Flag")
         
-        self.fFlagRadioButton = tk.Radiobutton(self, 
+        self.fFlagRadioButton = ttk.Radiobutton(self, 
             text='F flag sequence',
             #font=helv18,
             variable = self.startType,
@@ -717,7 +734,7 @@ class Application(tk.Frame):
         self.fFlagRadioButton.grid(row=0,column=0,sticky=tk.W,pady=2)
         
         
-        self.classFlagRadioButton = tk.Radiobutton(self, 
+        self.classFlagRadioButton = ttk.Radiobutton(self, 
             text='Class flag sequence',
             #font=helv18,
             variable = self.startType,
@@ -725,7 +742,7 @@ class Application(tk.Frame):
         self.classFlagRadioButton.grid(row=1,column=0,sticky=tk.W,pady=2)
         
     
-        self.label1 = tk.Label(self, text='Number of starts:')
+        self.label1 = ttk.Label(self, text='Number of starts:')
         self.label1.grid(row=0,column=2,sticky=tk.E,pady=2)
             
         
@@ -739,32 +756,33 @@ class Application(tk.Frame):
         self.numberStartsSpinbox.grid(row=0,column=3,sticky=tk.W)
         
         
-        self.label3 = tk.Label(self, 
+        self.label3 = ttk.Label(self, 
             text='Minutes to sequence start:')
         self.label3.grid(row=1,column=2,sticky=tk.E,pady=2)
         
         self.timeToSequenceStart = tk.IntVar()
+        self.timeToSequenceStart.set(1)
         self.timeToSequenceStartSpinbox = tk.Spinbox(self,
             textvariable=self.timeToSequenceStart,
-            from_=1,
+            from_=0,
             to=5,
             width=3)
         
         self.timeToSequenceStartSpinbox.grid(row=1,column=3,sticky=tk.W)
         
-        self.label4 = tk.Label(self,
+        self.label4 = ttk.Label(self,
         text="Countdown to start sequence")
         self.label4.grid(row=4,column=0,columnspan=2,sticky=tk.E,pady=10)
         
         self.countdownToFirstLight = tk.StringVar()
         self.countdownToFirstLight.set("..:..")
-        self.countdownToFirstLightLabel = tk.Label(self,
+        self.countdownToFirstLightLabel = ttk.Label(self,
             textvariable=self.countdownToFirstLight,anchor=tk.W)
         self.countdownToFirstLightLabel.grid(row=4,column=2)
 
         self.relayStatus = tk.StringVar()
         self.relayStatus.set("Establishing session to lights")
-        self.relayStatusLabel = tk.Label(self, 
+        self.relayStatusLabel = ttk.Label(self, 
             textvariable=self.relayStatus,
             anchor=tk.W)
         self.relayStatusLabel.grid(row=6,column=0)
@@ -772,40 +790,40 @@ class Application(tk.Frame):
 
 
 
-        self.lightsOffButton = tk.Button(self, text='Lights off',
+        self.lightsOffButton = ttk.Button(self, text='Lights off',
             state=tk.DISABLED,
             command=self.lightsOff)
         self.lightsOffButton.grid(row=4,column=5)
         
         
-        self.oneLightButton = tk.Button(self,text='1',
+        self.oneLightButton = ttk.Button(self,text='1',
             state=tk.DISABLED,
             command=self.oneLight)
         self.oneLightButton.grid(row=0,column=4)
         
         
-        self.flashingOneLightButton = tk.Button(self,text='1 flashing',
+        self.flashingOneLightButton = ttk.Button(self,text='1 flashing',
             state=tk.DISABLED,
             command=self.flashingOneLight)
         self.flashingOneLightButton.grid(row=0,column=5)
         
         
-        self.twoLightsButton = tk.Button(self,text='2',
+        self.twoLightsButton = ttk.Button(self,text='2',
             state=tk.DISABLED,
             command=self.twoLights)
         self.twoLightsButton.grid(row=1,column=4)
         
-        self.threeLightsButton = tk.Button(self,text='3',
+        self.threeLightsButton = ttk.Button(self,text='3',
             state=tk.DISABLED,
             command=self.threeLights)
         self.threeLightsButton.grid(row=2,column=4)
         
-        self.fourLightsButton = tk.Button(self,text='4',
+        self.fourLightsButton = ttk.Button(self,text='4',
             state=tk.DISABLED,
             command=self.fourLights)
         self.fourLightsButton.grid(row=3,column=4)
         
-        self.fiveLightsButton = tk.Button(self,text='5',
+        self.fiveLightsButton = ttk.Button(self,text='5',
             state=tk.DISABLED,
             command=self.fiveLights)
         self.fiveLightsButton.grid(row=4,column=4)
@@ -814,45 +832,45 @@ class Application(tk.Frame):
         # the start button is disabled on startup to give the
         # serial port connection time to establish. We enable
         # after 1 second.
-        self.startButton = tk.Button(self, text='Start sequence',
+        self.startButton = ttk.Button(self, text='Start sequence',
             state=tk.DISABLED,
-            command=self.startCountdown)
+            command=self.startCountdownOnConfirm)
         self.startButton.grid(row=2,column=0,ipadx=5,ipady=6,padx=2)
         
-        self.resetSequenceButton = tk.Button(self, text='Reset sequence',
+        self.resetSequenceButton = ttk.Button(self, text='Reset sequence',
             state=tk.DISABLED,
             command=self.resetSequence)
         self.resetSequenceButton.grid(row=3,column=0,ipadx=5,ipady=6,padx=2)
         
         
-        self.quitButton = tk.Button(self, text='Quit',
+        self.quitButton = ttk.Button(self, text='Quit',
             command=self.quitApp)            
         self.quitButton.grid(row=7,column=5,ipadx=5,ipady=6,padx=2)      
         
-        self.label5 = tk.Label(self, text='Current step')
+        self.label5 = ttk.Label(self, text='Current step')
         self.label5.grid(row=7, column = 0)
         
         
         self.currentStepDescription = tk.StringVar()
         self.currentStepDescription.set("None")
-        self.currentStepDescriptionLabel = tk.Label(self,
+        self.currentStepDescriptionLabel = ttk.Label(self,
             textvariable = self.currentStepDescription)
         self.currentStepDescriptionLabel.grid(row=7, column =1, columnspan=2)
         
         
         self.currentStepTimeRemaining = tk.StringVar()
         self.currentStepTimeRemaining.set("Not started")
-        self.currentStepTimeRemainingLabel = tk.Label(self,
+        self.currentStepTimeRemainingLabel = ttk.Label(self,
             textvariable = self.currentStepTimeRemaining)
         self.currentStepTimeRemainingLabel.grid(row=7, column =3, columnspan=1)
         
         
-        self.label6 = tk.Label(self, text='Next step')
+        self.label6 = ttk.Label(self, text='Next step')
         self.label6.grid(row=8, column = 0)
         
         self.nextStepDescription = tk.StringVar()
         self.nextStepDescription.set("None")
-        self.nextStepDescriptionLabel = tk.Label(self,
+        self.nextStepDescriptionLabel = ttk.Label(self,
             textvariable = self.nextStepDescription)
         self.nextStepDescriptionLabel.grid(row=8, column =1, columnspan=2)
         
