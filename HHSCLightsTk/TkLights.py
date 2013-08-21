@@ -38,7 +38,8 @@ from the Tk App to this object.
 20130807 - MB - Changed configuration of minutes to race start to be zero minutes. This allows an immediate start of the light sequence,
 for example if the race team forget to start initiate the lights countdown before the start of the race.
 20130809 - MB Added a five minute "F flag" StartRaceStep. Changed label to "Minutes to F Flag".
-20130818 - MB Added "current step" and "next step" labels with countdown on current step 
+20130818 - MB Added "current step" and "next step" labels with countdown on current step
+20130821 - MB Restyled layout  
 '''
 
 # this would be much better as a parameter to the script
@@ -738,7 +739,7 @@ class Application(tk.Frame):
             text='Class flag sequence',
             #font=helv18,
             variable = self.startType,
-            value = "Class" )
+            value = "Class")
         self.classFlagRadioButton.grid(row=1,column=0,sticky=tk.W,pady=2)
         
     
@@ -785,48 +786,53 @@ class Application(tk.Frame):
         self.relayStatusLabel = ttk.Label(self, 
             textvariable=self.relayStatus,
             anchor=tk.W)
-        self.relayStatusLabel.grid(row=6,column=0)
+        self.relayStatusLabel.grid(row=10,column=0,sticky=tk.W)
 
 
-
-
-        self.lightsOffButton = ttk.Button(self, text='Lights off',
+        self.manualLightsFrame = ttk.LabelFrame(self,text="Manual control")
+        self.manualLightsFrame['borderwidth'] = 2
+        self.manualLightsFrame['relief'] = 'sunken'
+        self.manualLightsFrame['padding'] = (5,10)
+        self.manualLightsFrame.grid(row=0,column=4,rowspan=5,columnspan=2)
+        
+        
+        self.lightsOffButton = ttk.Button(self.manualLightsFrame, text='Lights off',
             state=tk.DISABLED,
             command=self.lightsOff)
-        self.lightsOffButton.grid(row=4,column=5)
+        self.lightsOffButton.grid(row=5,column=1)
         
         
-        self.oneLightButton = ttk.Button(self,text='1',
+        self.oneLightButton = ttk.Button(self.manualLightsFrame,text='1',
             state=tk.DISABLED,
             command=self.oneLight)
-        self.oneLightButton.grid(row=0,column=4)
+        self.oneLightButton.grid(row=1,column=0)
         
         
-        self.flashingOneLightButton = ttk.Button(self,text='1 flashing',
+        self.flashingOneLightButton = ttk.Button(self.manualLightsFrame,text='1 flashing',
             state=tk.DISABLED,
             command=self.flashingOneLight)
-        self.flashingOneLightButton.grid(row=0,column=5)
+        self.flashingOneLightButton.grid(row=1,column=1)
         
         
-        self.twoLightsButton = ttk.Button(self,text='2',
+        self.twoLightsButton = ttk.Button(self.manualLightsFrame,text='2',
             state=tk.DISABLED,
             command=self.twoLights)
-        self.twoLightsButton.grid(row=1,column=4)
+        self.twoLightsButton.grid(row=2,column=0)
         
-        self.threeLightsButton = ttk.Button(self,text='3',
+        self.threeLightsButton = ttk.Button(self.manualLightsFrame,text='3',
             state=tk.DISABLED,
             command=self.threeLights)
-        self.threeLightsButton.grid(row=2,column=4)
+        self.threeLightsButton.grid(row=3,column=0)
         
-        self.fourLightsButton = ttk.Button(self,text='4',
+        self.fourLightsButton = ttk.Button(self.manualLightsFrame,text='4',
             state=tk.DISABLED,
             command=self.fourLights)
-        self.fourLightsButton.grid(row=3,column=4)
+        self.fourLightsButton.grid(row=4,column=0)
         
-        self.fiveLightsButton = ttk.Button(self,text='5',
+        self.fiveLightsButton = ttk.Button(self.manualLightsFrame,text='5',
             state=tk.DISABLED,
             command=self.fiveLights)
-        self.fiveLightsButton.grid(row=4,column=4)
+        self.fiveLightsButton.grid(row=5,column=0)
         
         
         # the start button is disabled on startup to give the
@@ -834,45 +840,59 @@ class Application(tk.Frame):
         # after 1 second.
         self.startButton = ttk.Button(self, text='Start sequence',
             state=tk.DISABLED,
-            command=self.startCountdownOnConfirm)
+            command=self.startCountdownOnConfirm,            
+            width=20)
         self.startButton.grid(row=2,column=0,ipadx=5,ipady=6,padx=2)
         
         self.resetSequenceButton = ttk.Button(self, text='Reset sequence',
             state=tk.DISABLED,
-            command=self.resetSequence)
+            command=self.resetSequence,
+            width=20)
         self.resetSequenceButton.grid(row=3,column=0,ipadx=5,ipady=6,padx=2)
         
         
         self.quitButton = ttk.Button(self, text='Quit',
             command=self.quitApp)            
-        self.quitButton.grid(row=7,column=5,ipadx=5,ipady=6,padx=2)      
+        self.quitButton.grid(row=10,column=5,ipadx=5,ipady=6,padx=2)      
         
-        self.label5 = ttk.Label(self, text='Current step')
-        self.label5.grid(row=7, column = 0)
+        #
+        # We have a separate label from for the steps
+        #
+        self.stepStyle = ttk.Style()
+        self.stepStyle.configure("steps.TLabel", font='Helvetica 12') 
+    
+        self.stepFeedbackFrame = ttk.LabelFrame(self, text="Steps")
+        self.stepFeedbackFrame.grid(row=7,column=0,rowspan=3,columnspan=4,sticky=tk.N+tk.E+tk.S+tk.W)
+        
+        self.label5 = ttk.Label(self.stepFeedbackFrame, text='Current step',style="steps.TLabel",anchor=tk.W)
+        self.label5.grid(row=0, column = 0,sticky=tk.E+tk.W)
         
         
         self.currentStepDescription = tk.StringVar()
         self.currentStepDescription.set("None")
-        self.currentStepDescriptionLabel = ttk.Label(self,
-            textvariable = self.currentStepDescription)
-        self.currentStepDescriptionLabel.grid(row=7, column =1, columnspan=2)
+        self.currentStepDescriptionLabel = ttk.Label(self.stepFeedbackFrame,
+            textvariable = self.currentStepDescription,style="steps.TLabel",anchor=tk.W)
+        self.currentStepDescriptionLabel["width"] = 40
+        self.currentStepDescriptionLabel.grid(row=0, column =1, columnspan=2)
         
         
         self.currentStepTimeRemaining = tk.StringVar()
         self.currentStepTimeRemaining.set("Not started")
-        self.currentStepTimeRemainingLabel = ttk.Label(self,
-            textvariable = self.currentStepTimeRemaining)
-        self.currentStepTimeRemainingLabel.grid(row=7, column =3, columnspan=1)
+        self.currentStepTimeRemainingLabel = ttk.Label(self.stepFeedbackFrame,
+            textvariable = self.currentStepTimeRemaining,style="steps.TLabel",anchor=tk.W)
+        self.currentStepTimeRemainingLabel.grid(row=0, column =3, columnspan=1)
         
         
-        self.label6 = ttk.Label(self, text='Next step')
-        self.label6.grid(row=8, column = 0)
+        self.label6 = ttk.Label(self.stepFeedbackFrame, text='Next step',style="steps.TLabel",anchor=tk.W)
+        self.label6.grid(row=1, column = 0,sticky=tk.E+tk.W)
         
         self.nextStepDescription = tk.StringVar()
         self.nextStepDescription.set("None")
-        self.nextStepDescriptionLabel = ttk.Label(self,
-            textvariable = self.nextStepDescription)
-        self.nextStepDescriptionLabel.grid(row=8, column =1, columnspan=2)
+        
+        self.nextStepDescriptionLabel = ttk.Label(self.stepFeedbackFrame,
+            textvariable = self.nextStepDescription,style="steps.TLabel",anchor=tk.W)
+        self.nextStepDescriptionLabel["width"] = 40
+        self.nextStepDescriptionLabel.grid(row=1, column =1, columnspan=2)
         
         
     def updateCurrentStepTimeRemaining(self):
