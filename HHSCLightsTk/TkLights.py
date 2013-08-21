@@ -720,8 +720,8 @@ class Application(tk.Frame):
     
     def createWidgets(self):
     
-        helv18 = tkFont.Font(family="Helvetica",size=18,weight="bold")
-        helv12 = tkFont.Font(family="Helvetica",size=12)
+        style = ttk.Style()
+        style.configure('.', font=('Helvetica',16))
     
         self.startType = tk.StringVar()
         self.startType.set("Flag")
