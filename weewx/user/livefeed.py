@@ -100,7 +100,8 @@ configuration option "report_services", located in sub-section [Engine][[Service
     ...
     process_services = weewx.engine.StdPrint, weewx.engine.StdReport, user.livefeed.MemcacheJson
 
-
+You will also need the python memcache module loaded. On debian
+apt-get install python-memcache
 
 ********************************************************************************
 """
