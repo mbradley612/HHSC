@@ -1,0 +1,8 @@
+{
+
+"dayPressureData":[
+#for $_record in $span($day_delta=1).records
+["$_record.dateTime.nolabel('%Y-%m-%dT%H:%M:%S')",$_record.pressure.mbar.nolabel("%f")],
+]
+#end for
+}

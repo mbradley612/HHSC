@@ -1,0 +1,11 @@
+{
+
+"dayWindData":[
+["DateTime","speed","gust","direction"],
+#set lineSeparator = ""
+#for $_record in $span($day_delta=1).records
+$lineSeparator ["$_record.dateTime.nolabel('%Y-%m-%dT%H:%M:%S')",$_record.windSpeed.knot.nolabel("%f"), $_record.windGust.knot.nolabel("%f"),$_record.windDir.nolabel("%f")]
+#set lineSeparator = ",\n"
+#end for
+]
+}
