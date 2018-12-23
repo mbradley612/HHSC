@@ -100,8 +100,7 @@ configuration option "report_services", located in sub-section [Engine][[Service
     ...
     process_services = weewx.engine.StdPrint, weewx.engine.StdReport, user.livefeed.MemcacheJson
 
-You will also need the python memcache module loaded. On debian
-apt-get install python-memcache
+
 
 ********************************************************************************
 """
@@ -165,7 +164,7 @@ class MemcacheJsonPoster():
         
 		  # figure out what our input units must be. This is a one off, as our input units won't change.
         self.obs_type_input_units = dict([ (obs_type, weewx.units.getStandardUnitType(weewx.US, obs_type)) for obs_type in self.obs_types])
-        
+        syslog.syslog(syslog.LOG_INFO,"MemcacheJson: setup obs_type_input_units")
     
     def run(self):
         """If there is a database specified, open the database, then call
@@ -246,8 +245,11 @@ class MemcacheJsonPoster():
     def process_record(self, event):
         """Write the  LOOP packet to memcache"""
         # we should really put this into a separate thread with a queue to keep it all tidy
-        
-        filtered_packet = { obs_type : event.packet[obs_type] for obs_type in self.obs_types }
+
+        # as of weewx 3.8.2, if there is no reading for an observation type then it doesn't appear in the event packet
+
+        filtered_packet = { obs_type : event.packet[obs_type] for obs_type in self.obs_types if obs_type in event.packet}
+
         
         # convert our obs value into a tuple of value plus unit. To quote from the comment in weewx.units:
         #	
@@ -297,7 +299,13 @@ class MemcacheJsonPoster():
             filtered_output[obs_type] = observation_output
 				
 
-        
+        # now check for any observation types that we didn't get readings for and set the value as N/A
+        for obs_type in self.obs_types:
+            if obs_type in filtered_output:
+                pass
+            else:
+                filtered_output[obs_type] = "N/A"
+
         json_string = json.dumps(filtered_output)
         return self.mc.set(self.cache_key,json_string)
         
