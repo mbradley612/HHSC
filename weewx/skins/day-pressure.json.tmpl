@@ -1,8 +1,12 @@
 {
 
 "dayPressureData":[
+#set lineSeparator = ""
 #for $_record in $span($day_delta=1).records
-["$_record.dateTime.nolabel('%Y-%m-%dT%H:%M:%S')",$_record.pressure.mbar.nolabel("%f")],
-]
+#unless "N/A" in $_record.barometer.mbar.nolabel("%f")
+$lineSeparator ["$_record.dateTime.nolabel('%Y-%m-%dT%H:%M:%S')",$_record.barometer.mbar.nolabel("%f")]
+#set lineSeparator = ",\n"
+#end unless
 #end for
+]
 }
