@@ -9,16 +9,33 @@ dayUrl = '/weewx/day.json';
 
 xhttp.onreadystatechange = function(){
   if (this.readyState == 4 && this.status == 200) { // Set a callback to run when the Google Visualization API is loaded.
-  r=this.responseText;
-  //console.log(r);
+    r=this.responseText;
+    //console.log(r);
 
-	windJsonData = JSON.parse(r).dayWindData;
-  pressureJsonData =JSON.parse(r).dayPressureData;
-  outTemp = JSON.parse(r).dayOutTemp;
-  inTemp =	JSON.parse(r).dayInTemp;
-  google.charts.setOnLoadCallback(drawCharts); } }
+    latestArchiveData = JSON.parse(r).latestArchiveRecord;
+    windJsonData = JSON.parse(r).dayWindData;
+    pressureJsonData =JSON.parse(r).dayPressureData;
+    outTemp = JSON.parse(r).dayOutTemp;
+    inTemp =	JSON.parse(r).dayInTemp;
 
-xhttp.open("GET",dayUrl); xhttp.send();
+    updateLatestArchive();
+
+
+    google.charts.setOnLoadCallback(drawCharts);
+  }
+}
+
+xhttp.open("GET",dayUrl);
+xhttp.send();
+
+function updateLatestArchive() {
+
+  jQuery("#latestArchiveDateTime").text(latestArchiveData.dateTime);
+  jQuery("#latestArchiveWindSpeed").text(latestArchiveData.windSpeed);
+  jQuery("#latestArchiveWindGust").text(latestArchiveData.windGust);
+  jQuery("#latestArchiveWindDirection").text(latestArchiveData.windDirectionOrdinal);
+  jQuery("#latestArchivePressure").text(latestArchiveData.pressure);
+};
 
 function drawCharts() { //Create table data
 
