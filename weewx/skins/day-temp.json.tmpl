@@ -1,6 +1,6 @@
 {
 
-"dayOutTempData":[
+"dayOutTemp":[
 #for $_record in $span($day_delta=1).records
 ["$_record.dateTime.nolabel('%Y-%m-%dT%H:%M:%S')",$_record.outTemp.degree_C.nolabel("%f"),$_record.inTemp.degree_C.nolabel("%f")]],
 ]

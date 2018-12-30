@@ -1,13 +1,56 @@
 {
 
-"currentDateTime":"$current.dateTime.nolabel('%Y-%M-%dT%H:%M:%S')"
+"currentDateTime":"$current.dateTime.nolabel('%Y-%M-%dT%H:%M:%S')",
 
-"current":{
+"latestArchive":{
 	"outsideTemperature":"$current.outTemp",
 	"windSpeed":"$current.windSpeed",
 	"windDirection":"$current.windDir",
 	"windDirectionOrdinal":"$current.windDir.ordinal_compass",
 	"windGust":"$current.windGust",
 	"pressure":"$current.barometer"
-}
+},
+
+"dayWindData":[
+#set lineSeparator = ""
+#for $_record in $span($day_delta=1).records
+#unless "N/A" in $_record.windDir.nolabel("%f")
+$lineSeparator ["$_record.dateTime.nolabel('%Y-%m-%dT%H:%M:%S')",$_record.windSpeed.knot.nolabel("%f"), $_record.windGust.knot.nolabel("%f"),$_record.windDir.nolabel("%f")]
+#set lineSeparator = ",\n"
+#end unless
+#end for
+],
+
+
+"dayPressureData":[
+#set lineSeparator = ""
+#for $_record in $span($day_delta=1).records
+#unless "N/A" in $_record.barometer.mbar.nolabel("%f")
+$lineSeparator ["$_record.dateTime.nolabel('%Y-%m-%dT%H:%M:%S')",$_record.barometer.mbar.nolabel("%f")]
+#set lineSeparator = ",\n"
+#end unless
+#end for
+],
+
+
+"dayOutTemp":[
+#set lineSeparator = ""
+#for $_record in $span($day_delta=1).records
+#unless "N/A" in $_record.outTemp.degree_C.nolabel("%f")
+$lineSeparator ["$_record.dateTime.nolabel('%Y-%m-%dT%H:%M:%S')",$_record.outTemp.degree_C.nolabel("%f")]
+#end unless
+#end for
+],
+
+"dayInTemp":[
+#set lineSeparator = ""
+#for $_record in $span($day_delta=1).records
+#unless "N/A" in $_record.inTemp.degree_C.nolabel("%f")
+$lineSeparator ["$_record.dateTime.nolabel('%Y-%m-%dT%H:%M:%S')",$_record.inTemp.degree_C.nolabel("%f")]
+#set lineSeparator = ",\n"
+#end unless
+#end for
+]
+
+
 }
