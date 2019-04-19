@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<weewx timestamp="889923"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:noNamespaceSchemaLocation="weewx.xsd">
+	
+	<version>3.8.2</version>
+	<uptime>37 days, 8 hours, 23 minutes</uptime>
+	<weewxtime>37 days, 7 hours, 31 minutes</weewxtime>
+	
+	<extras>
+	</extras>
+	
+  <station>
+		<hardware>Vantage Pro2</hardware>
+		<location>Hill Head Sailing Club, Fareham, UK</location>
+		<latitude degs="50">49.35' N</latitude>
+		<longitude degs="001">14.47' W</longitude>
+		<altitude>7 meters</altitude>
+	</station>
+	
+  <current>
+    <dateTime>14/04/19 18:40:00</dateTime>
+    <outTemp>N/A</outTemp>
+    <windchill>   N/A</windchill>
+    <heatindex>   N/A</heatindex>
+    <dewpoint>   N/A</dewpoint>
+		<barometer trend="-0.6 mbar">1023.1 mbar</barometer>
+    <windspeed>19</windspeed>
+    <windgust>23</windgust>
+    <windCompass>ENE</windCompass>
+    <windUnit> knots</windUnit>
+    <pressure>1023</pressure>
+    <pressureUnit> mbar</pressureUnit>
+    <tempUnit>&#176;C</tempUnit>
+		<wind winddir="68&#176;" compass="ENE" windgust="23 knots">19 knots</wind>
+		<rainRate>0.0 mm/hr</rainRate> 
+		<inTemp>16.6&#176;C</inTemp>
+	</current>
+	
+	<day>
+			<outTempmax time="   N/A">   N/A</outTempmax>
+			<outTempmin time="   N/A">   N/A</outTempmin>
+
+			<heatindex time="   N/A">   N/A</heatindex>
+
+			<windchill time="   N/A">   N/A</windchill>
+
+			<maxhumidity time="   N/A">   N/A</maxhumidity>
+			<minhumidity time="   N/A">   N/A</minhumidity>
+
+			<maxdewpoint time="   N/A">   N/A</maxdewpoint>
+			<mindewpoint time="   N/A">   N/A</mindewpoint>
+
+			<maxbarometer time="00:00:01">1025.1 mbar</maxbarometer>
+			<minbarometer time="13:11:00">1022.9 mbar</minbarometer>
+
+			<rainsum>0.0 mm</rainsum>
+			<rainrate time="00:00:01">0.0 mm/hr</rainrate>
+			
+			<windmax time="13:08:00" direction="75&#176;">32 knots</windmax>
+			<windaverage>12 knots</windaverage>
+			<windrms>13 knots</windrms>
+			<windvector direction="66&#176;">10 knots</windvector>
+
+			<inTempmax time="13:42:58">18.4&#176;C</inTempmax>
+			<inTempmin time="06:44:57">12.4&#176;C</inTempmin>			
+
+	</day>
+	
+	<week>
+			<outTempmax time="   N/A">   N/A</outTempmax>
+			<outTempmin time="   N/A">   N/A</outTempmin>
+
+			<heatindex time="   N/A">   N/A</heatindex>
+
+			<windchill time="   N/A">   N/A</windchill>
+
+			<maxhumidity time="   N/A">   N/A</maxhumidity>
+			<minhumidity time="   N/A">   N/A</minhumidity>
+
+			<maxdewpoint time="   N/A">   N/A</maxdewpoint>
+			<mindewpoint time="   N/A">   N/A</mindewpoint>
+
+			<maxbarometer time="07:53:00 (Saturday)">1026.9 mbar</maxbarometer>
+			<minbarometer time="03:35:01 (Monday)">1008.7 mbar</minbarometer>
+
+			<rainsum>1.0 mm</rainsum>
+			<rainrate time="00:00:03 (Monday)">0.0 mm/hr</rainrate>
+			
+			
+			<windmax time="13:08:00 (Sunday)" direction="75&#176;">32 knots</windmax>
+			<windaverage>7 knots</windaverage>
+			<windrms>8 knots</windrms>
+			<windvector direction="53&#176;">5 knots</windvector>
+
+			<inTempmax time="17:42:59 (Wednesday)">24.2&#176;C</inTempmax>
+			<inTempmin time="06:44:57 (Sunday)">12.4&#176;C</inTempmin>			
+
+	</week>	
+	
+	<month>
+			<outTempmax time="   N/A">   N/A</outTempmax>
+			<outTempmin time="   N/A">   N/A</outTempmin>
+
+			<heatindex time="   N/A">   N/A</heatindex>
+
+			<windchill time="   N/A">   N/A</windchill>
+
+			<maxhumidity time="   N/A">   N/A</maxhumidity>
+			<minhumidity time="   N/A">   N/A</minhumidity>
+
+			<maxdewpoint time="   N/A">   N/A</maxdewpoint>
+			<mindewpoint time="   N/A">   N/A</mindewpoint>
+
+			<maxbarometer time="13/04/19 07:53:00">1026.9 mbar</maxbarometer>
+			<minbarometer time="04/04/19 08:35:02">991.4 mbar</minbarometer>
+
+			<rainsum>1.0 mm</rainsum>
+			<rainrate time="01/04/19 00:00:05">0.0 mm/hr</rainrate>
+			
+			
+			<windmax time="04/04/19 15:28:09" direction="189&#176;">76 knots</windmax>
+			<windaverage>9 knots</windaverage>
+			<windrms>11 knots</windrms>
+			<windvector direction="77&#176;">5 knots</windvector>
+
+			<inTempmax time="01/04/19 17:02:01">27.9&#176;C</inTempmax>
+			<inTempmin time="05/04/19 04:20:00">10.3&#176;C</inTempmin>			
+
+	</month>
+	
+	<year>
+			<outTempmax time="   N/A">   N/A</outTempmax>
+			<outTempmin time="   N/A">   N/A</outTempmin>
+
+			<heatindex time="   N/A">   N/A</heatindex>
+
+			<windchill time="   N/A">   N/A</windchill>
+
+			<maxhumidity time="06/02/19 12:43:13">92%</maxhumidity>
+			<minhumidity time="08/02/19 13:18:50">0%</minhumidity>
+
+			<maxdewpoint time="   N/A">   N/A</maxdewpoint>
+			<mindewpoint time="   N/A">   N/A</mindewpoint>
+
+			<maxbarometer time="02/01/19 10:10:00">1044.1 mbar</maxbarometer>
+			<minbarometer time="01/02/19 00:04:03">980.8 mbar</minbarometer>
+
+			<rainsum>13.0 mm</rainsum>
+			<rainrate time="03/02/19 08:33:33">10.2 mm/hr</rainrate>
+			
+			
+			<windmax time="31/01/19 23:20:21" direction="303&#176;">76 knots</windmax>
+			<windaverage>10 knots</windaverage>
+			<windrms>13 knots</windrms>
+			<windvector direction="222&#176;">5 knots</windvector>
+
+			<inTempmax time="02/02/19 15:32:02">32.7&#176;C</inTempmax>
+			<inTempmin time="31/01/19 13:30:02">9.1&#176;C</inTempmin>			
+
+	</year>	
+	
+		<almanac>
+			<sun>
+				<sunrise>06:12:49</sunrise>
+				<sunset>06:12:49</sunset>
+			</sun>
+			<moon>
+				<phase fullness="68">First quarter</phase>
+			</moon>
+		</almanac>
+
+</weewx>
+ 
+

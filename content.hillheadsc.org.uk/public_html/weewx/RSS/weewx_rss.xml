@@ -1,0 +1,137 @@
+<?xml version="1.0"?>
+<rss version="2.0" 
+     xmlns:content="http://purl.org/rss/1.0/modules/content/"
+     xmlns:geo="http://www.w3.org/2003/01/geo/wgs84_pos#" >
+   <channel>
+      <title>Hill Head Sailing Club, Fareham, UK, Weather Conditions</title>
+      <link></link>
+      <description>Current conditions, and daily, monthly, and yearly summaries</description>
+      <language>en-us</language>
+      <pubDate>Sun, 14 Apr 2019 18:40:00 BST</pubDate>
+
+      <lastBuildDate>Sun, 14 Apr 2019 18:40:00 BST</lastBuildDate>
+      <docs>http://blogs.law.harvard.edu/tech/rss</docs>
+      <generator>weewx 3.8.2</generator>
+      <ttl>5.000000 minutes</ttl>
+      
+      <item>
+         <title>Weather Conditions at 14/04/19 18:40:00</title>
+         <link></link>
+         <description>
+           Outside temperature:    N/A; 
+           Barometer: 1023.1 mbar; 
+           Wind: 19 knots from 68&#176;; 
+           Rain rate: 0.0 mm/hr; 
+           Inside temperature: 16.6&#176;C
+         </description>
+         <pubDate>Sun, 14 Apr 2019 18:40:00 BST</pubDate>
+	     <geo:lat>50.822421</geo:lat>
+    	 <geo:long>-1.241165</geo:long>
+ 		 <content:encoded><![CDATA[
+           <p>
+             Time:                14/04/19 18:40:00<br/>
+             Outside Temperature:    N/A<br/>
+             Inside Temperature:  16.6&#176;C<br/>
+             Wind Chill:             N/A<br/>
+             Heat Index:             N/A<br/>
+             Dewpoint:               N/A<br/>
+             Humidity:               N/A<br/>
+             Barometer:           1023.1 mbar<br/>
+             Wind:                19 knots from 68&#176;<br/>
+             Rain Rate:           0.0 mm/hr<br/>
+        </p>
+      ]]></content:encoded>
+      </item>
+
+      <item>
+         <title>Daily Weather Summary as of 14/04/19 18:40:00</title>
+         <link></link>
+         <description>
+	        Min outside temperature:    N/A at    N/A;
+         	Max outside temperature:    N/A at    N/A;
+	        Min inside temperature:  12.4&#176;C at 06:44:57;
+	        Max inside temperature:  18.4&#176;C at 13:42:58;
+	        Min barometer:           1022.9 mbar at 13:11:00;
+	        Max barometer:           1025.1 mbar at 00:00:01;
+            Max wind :               32 knots from 75&#176; at 13:08:00;
+            Rain today:              0.0 mm
+         </description>
+         <pubDate>Sun, 14 Apr 2019 18:40:00 BST</pubDate>
+	     <geo:lat>50.822421</geo:lat>
+    	 <geo:long>-1.241165</geo:long>
+ 		 <content:encoded><![CDATA[
+           <p>
+             Day:                     14 Apr 2019<br/>
+	         Min Outside Temperature:    N/A at    N/A<br/>
+	         Max Outside Temperature:    N/A at    N/A<br/>
+	         Min Inside Temperature:  12.4&#176;C at 06:44:57<br/>
+	         Max Inside Temperature:  18.4&#176;C at 13:42:58<br/>
+	         Min Barometer:           1022.9 mbar at 13:11:00<br/>
+	         Max Barometer:           1025.1 mbar at 00:00:01<br/>
+             Max Wind :               32 knots from 75&#176; at 13:08:00<br/>
+             Rain today:              0.0 mm<br/>
+        </p>
+      ]]></content:encoded>
+      </item>
+
+      <item>
+         <title>Monthly Weather Summary as of 14/04/19 18:40:00</title>
+         <link>/month.html</link>
+         <description>
+	        Min outside temperature:    N/A at    N/A;
+         	Max outside temperature:    N/A at    N/A;
+	        Min inside temperature:  10.3&#176;C at 05/04/19 04:20:00;
+	        Max inside temperature:  27.9&#176;C at 01/04/19 17:02:01;
+	        Min barometer:           991.4 mbar at 04/04/19 08:35:02;
+	        Max barometer:           1026.9 mbar at 13/04/19 07:53:00;
+            Max wind :               76 knots from 189&#176; at 04/04/19 15:28:09;
+            Rain total for month:    1.0 mm
+         </description>
+         <pubDate>Sun, 14 Apr 2019 18:40:00 BST</pubDate>
+ 		 <content:encoded><![CDATA[
+           <p>
+             Month:                   April 2019<br/>
+	         Max Outside Temperature:    N/A at    N/A<br/>
+	         Min Outside Temperature:    N/A at    N/A<br/>
+	         Max Inside Temperature:  27.9&#176;C at 01/04/19 17:02:01<br/>
+	         Min Inside Temperature:  10.3&#176;C at 05/04/19 04:20:00<br/>
+	         Min Barometer:           991.4 mbar at 04/04/19 08:35:02<br/>
+	         Max Barometer:           1026.9 mbar at 13/04/19 07:53:00<br/>
+             Max Wind :               76 knots from 189&#176; at 04/04/19 15:28:09<br/>
+             Rain total for month:    1.0 mm<br/>
+        </p>
+      ]]></content:encoded>
+      </item>
+
+      <item>
+         <title>Yearly Weather Summary as of 14/04/19 18:40:00</title>
+         <link>/year.html</link>
+         <description>
+	        Min outside temperature:    N/A at    N/A;
+         	Max outside temperature:    N/A at    N/A;
+	        Min inside temperature:  9.1&#176;C at 31/01/19 13:30:02;
+	        Max inside temperature:  32.7&#176;C at 02/02/19 15:32:02;
+	        Min barometer:           980.8 mbar at 01/02/19 00:04:03;
+	        Max barometer:           1044.1 mbar at 02/01/19 10:10:00;
+            Max wind :               76 knots from 303&#176; at 31/01/19 23:20:21;
+            Rain total for year:     13.0 mm
+         </description>
+         <pubDate>Sun, 14 Apr 2019 18:40:00 BST</pubDate>
+ 		 <content:encoded><![CDATA[
+           <p>
+             Year:                    2019<br/>
+	         Max Outside Temperature:    N/A at    N/A<br/>
+	         Min Outside Temperature:    N/A at    N/A<br/>
+	         Max Inside Temperature:  32.7&#176;C at 02/02/19 15:32:02<br/>
+	         Min Inside Temperature:  9.1&#176;C at 31/01/19 13:30:02<br/>
+	         Min Barometer:           980.8 mbar at 01/02/19 00:04:03<br/>
+	         Max Barometer:           1044.1 mbar at 02/01/19 10:10:00<br/>
+             Max Wind :               76 knots from 303&#176; at 31/01/19 23:20:21<br/>
+             Rain total for year:     13.0 mm<br/>
+        </p>
+      ]]></content:encoded>
+      </item>
+
+   </channel>
+</rss>
+

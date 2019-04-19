@@ -1,0 +1,47 @@
+                   MONTHLY CLIMATOLOGICAL SUMMARY for Nov 2017
+
+
+NAME: Hill Head Sailing Club, Fareham, UK                  
+ELEV: 7 meters    LAT: 50-49.35 N    LONG: 001-14.47 W
+
+
+                   TEMPERATURE (C), RAIN (mm), WIND SPEED (knots)
+
+                                         HEAT   COOL         AVG
+      MEAN                               DEG    DEG          WIND                   DOM
+DAY   TEMP   HIGH   TIME    LOW   TIME   DAYS   DAYS   RAIN  SPEED   HIGH   TIME    DIR
+---------------------------------------------------------------------------------------
+ 01    N/A    N/A    N/A    N/A    N/A    0.0    0.0    0.0    5.0   15.6  13:33    125
+ 02    N/A    N/A    N/A    N/A    N/A    0.0    0.0    0.0    3.6    8.7  11:14    328
+ 03    N/A    N/A    N/A    N/A    N/A    0.0    0.0    0.0    4.7   13.0  21:26     47
+ 04    N/A    N/A    N/A    N/A    N/A    0.0    0.0    0.0    9.8   23.5  14:30    279
+ 05    N/A    N/A    N/A    N/A    N/A    0.0    0.0    0.0    8.5   22.6  11:45    296
+ 06    N/A    N/A    N/A    N/A    N/A    0.0    0.0    0.0    5.4   15.6  22:43    194
+ 07    N/A    N/A    N/A    N/A    N/A    0.0    0.0    0.0   12.1   24.3  11:24    190
+ 08    N/A    N/A    N/A    N/A    N/A    0.0    0.0    0.0    4.7   18.2  11:55    324
+ 09    N/A    N/A    N/A    N/A    N/A    0.0    0.0    0.0    4.7   12.2  23:13    287
+ 10    N/A    N/A    N/A    N/A    N/A    0.0    0.0    0.0   12.5   27.8  10:08    275
+ 11    N/A    N/A    N/A    N/A    N/A    0.0    0.0    0.0    8.8   25.2  04:56    259
+ 12    N/A    N/A    N/A    N/A    N/A    0.0    0.0    0.0    8.9   31.3  13:28    321
+ 13    N/A    N/A    N/A    N/A    N/A    0.0    0.0    0.0    5.4   15.6  03:32    309
+ 14    N/A    N/A    N/A    N/A    N/A    0.0    0.0    0.0    8.7   18.2  04:13    251
+ 15    N/A    N/A    N/A    N/A    N/A    0.0    0.0    0.0    3.7    9.6  02:21    249
+ 16    N/A    N/A    N/A    N/A    N/A    0.0    0.0    0.0    5.1   13.9  18:32    257
+ 17    N/A    N/A    N/A    N/A    N/A    0.0    0.0    0.0    2.2    8.7  13:35    352
+ 18    N/A    N/A    N/A    N/A    N/A    0.0    0.0    0.0    9.2   24.3  12:06    260
+ 19    N/A    N/A    N/A    N/A    N/A    0.0    0.0    0.0    2.6   10.4  12:28    317
+ 20    N/A    N/A    N/A    N/A    N/A    0.0    0.0    0.0   11.3   27.8  12:59    246
+ 21
+ 22
+ 23
+ 24
+ 25
+ 26
+ 27
+ 28
+ 29
+ 30
+---------------------------------------------------------------------------------------
+       N/A    N/A       N/A    N/A       N/A    0.0    0.0    0.0    6.8   31.3     12    275
+    
+
